@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Exercices – Clics & Sélections (Souris + Clavier)</title>
+  <style>
+    :root{
+      --bg:#0f172a;          /* slate-900 */
+      --panel:#111827;       /* gray-900 */
+      --card:#1f2937;        /* gray-800 */
+      --muted:#94a3b8;       /* slate-400 */
+      --text:#e5e7eb;        /* gray-200 */
+      --brand:#22d3ee;       /* cyan-400 */
+      --ok:#10b981;          /* emerald-500 */
+      --warn:#f59e0b;        /* amber-500 */
+      --err:#ef4444;         /* red-500 */
+      --shadow: 0 10px 25px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+    html,body{height:100%}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      background: radial-gradient(1200px 800px at 10% -10%, rgba(34,211,238,.12), transparent 60%),
+                  radial-gradient(800px 600px at 110% -20%, rgba(16,185,129,.12), transparent 60%),
+                  var(--bg);
+      color:var(--text); line-height:1.45;
+    }
+    header{
+      position:sticky; top:0; z-index:20; backdrop-filter: blur(8px);
+      background:linear-gradient(180deg, rgba(15,23,42,.9), rgba(15,23,42,.6));
+      border-bottom:1px solid rgba(148,163,184,.2);
+    }
+    .wrap{max-width:1100px; margin:0 auto; padding:16px 20px}
+    .brand{display:flex; align-items:center; gap:12px}
+    .brand .dot{width:10px; height:10px; border-radius:50%; background:var(--brand); box-shadow:0 0 18px rgba(34,211,238,.9)}
+    nav{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+    nav a{padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.06); color:var(--text); text-decoration:none; border:1px solid rgba(148,163,184,.2)}
+    nav a:hover{background:rgba(255,255,255,.12)}
+
+    main{padding:32px 20px}
+    .grid{max-width:1100px; margin:0 auto; display:grid; gap:22px}
+
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)); box-shadow:var(--shadow);
+      border:1px solid rgba(148,163,184,.18); border-radius:var(--radius); overflow:hidden}
+    .card header{position:relative; background:none; border:none}
+    .card h2{margin:0; padding:18px 22px}
+    .card .content{padding:22px}
+    .hint{color:var(--muted); font-size:.95rem}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .controls{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px}
+    button{background:var(--brand); color:#001016; border:none; padding:10px 14px; border-radius:12px; font-weight:600; cursor:pointer}
+    button.ghost{background:transparent; color:var(--text); border:1px solid rgba(148,163,184,.32)}
+    button.warn{background:var(--warn); color:#1e1300}
+    button.ok{background:var(--ok); color:#00140c}
+    .status{margin-left:auto; font-weight:700}
+
+    /* Exercise 1: simple click targets */
+    .targets{display:grid; grid-template-columns:repeat(6, 1fr); gap:14px; margin:12px 0}
+    .target{aspect-ratio:1/1; border-radius:14px; background:#0b1222; border:1px solid rgba(148,163,184,.25);
+      display:flex; align-items:center; justify-content:center; user-select:none; position:relative}
+    .target:hover{outline:2px solid rgba(34,211,238,.4)}
+    .target.done{background:rgba(16,185,129,.15); border-color:rgba(16,185,129,.5)}
+    .badge{position:absolute; top:8px; right:8px; font-size:12px; padding:2px 6px; border-radius:999px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2)}
+
+    /* Exercise 2: double click tiles */
+    .tiles{display:grid; grid-template-columns:repeat(6, 1fr); gap:14px; margin:12px 0}
+    .tile{aspect-ratio:4/3; border-radius:12px; background:#0c152a; border:1px dashed rgba(148,163,184,.3); display:grid; place-items:center; user-select:none}
+    .tile.ok{border-style:solid; border-color:rgba(16,185,129,.6); background:rgba(16,185,129,.12)}
+
+    /* Exercise 3: triple click pad */
+    .pad{height:180px; border-radius:14px; border:2px dashed rgba(148,163,184,.35); display:grid; place-items:center; user-select:none; background:repeating-linear-gradient(135deg, rgba(255,255,255,.03) 0 16px, rgba(255,255,255,.01) 16px 32px)}
+    .pad.tripled{border-color:rgba(16,185,129,.7); background:rgba(16,185,129,.08)}
+
+    /* Exercises 4 & 5: word selection */
+    .textbox{padding:16px; border-radius:12px; background:#0a1222; border:1px solid rgba(148,163,184,.25)}
+    .words{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+    .word{padding:6px 8px; border-radius:8px; background:rgba(255,255,255,.06); border:1px solid rgba(148,163,184,.25); cursor:pointer; user-select:none}
+    .word.sel{background:rgba(34,211,238,.2); border-color:rgba(34,211,238,.7)}
+    .legend{font-size:.92rem; color:var(--muted)}
+
+    footer{max-width:1100px; margin:32px auto 60px; color:var(--muted); text-align:center}
+    .small{font-size:.9rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="brand">
+        <span class="dot"></span>
+        <div>
+          <strong>Exercices Souris + Clavier</strong><br>
+          <span class="hint">Apprendre : clic gauche, double, triple, sélection Ctrl & Shift</span>
+        </div>
+      </div>
+      <nav aria-label="Navigation">
+        <a href="#ex1">1. Clic gauche</a>
+        <a href="#ex2">2. Double clic</a>
+        <a href="#ex3">3. Triple clic</a>
+        <a href="#ex4">4. Sélection Ctrl</a>
+        <a href="#ex5">5. Sélection Shift</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="ex1" class="grid card">
+      <header><h2>1) Le simple clic gauche</h2></header>
+      <div class="content">
+        <p class="hint">Objectif : cliquer <strong>une fois</strong> sur chaque case. Un simple clic valide la case. Les doubles/triples clics ne comptent pas.</p>
+        <div class="controls"><button class="ghost" id="ex1Reset">Réinitialiser</button><span class="status" id="ex1Status">0 / 12</span></div>
+        <div class="targets" id="targets"></div>
+      </div>
+    </section>
+
+    <section id="ex2" class="grid card">
+      <header><h2>2) Le double clic gauche</h2></header>
+      <div class="content">
+        <p class="hint">Objectif : faire un <strong>double‑clic</strong> sur chaque tuile. Un simple clic ne suffit pas.</p>
+        <div class="controls"><button class="ghost" id="ex2Reset">Réinitialiser</button><span class="status" id="ex2Status">0 / 10</span></div>
+        <div class="tiles" id="tiles"></div>
+      </div>
+    </section>
+
+    <section id="ex3" class="grid card">
+      <header><h2>3) Le triple clic gauche</h2></header>
+      <div class="content">
+        <p class="hint">Objectif : réaliser un <strong>triple‑clic</strong> rapide à l’intérieur du pavé. Trois clics consécutifs en moins d’une seconde.</p>
+        <div class="controls"><button class="ghost" id="ex3Reset">Réinitialiser</button><span class="status" id="ex3Status">En attente…</span></div>
+        <div class="pad" id="pad" aria-label="Zone de triple clic"><div>Triple‑cliquez ici</div></div>
+      </div>
+    </section>
+
+    <section id="ex4" class="grid card">
+      <header><h2>4) Sélection de texte avec la touche CTRL</h2></header>
+      <div class="content">
+        <p class="hint">Objectif : <strong>maintenez CTRL</strong> et cliquez pour sélectionner <em>uniquement</em> ces mots : <strong>ordinateur</strong>, <strong>souris</strong>, <strong>clavier</strong>. Vous pouvez cliquer à nouveau pour désélectionner.</p>
+        <div class="controls"><button class="ghost" id="ex4Reset">Réinitialiser</button><button class="ok" id="ex4Check">Vérifier</button><span class="status" id="ex4Status">En attente…</span></div>
+        <div class="textbox">
+          <div class="legend">Astuce : sans CTRL, un clic seul réinitialise la sélection (comme dans la vraie vie, un clic perd la multi‑sélection).</div>
+          <div class="words" id="ctrlWords"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="ex5" class="grid card">
+      <header><h2>5) Sélection de texte avec la touche SHIFT (⇧)</h2></header>
+      <div class="content">
+        <p class="hint">Objectif : sélectionnez un <strong>intervalle</strong> de mots du texte en <strong>cliquant un premier mot</strong> puis en <strong>maintenant SHIFT ⇧</strong> tout en cliquant le <strong>dernier mot</strong> de l’intervalle demandé : <strong>de “apprendre” à “ordinateur”.</strong></p>
+        <div class="controls"><button class="ghost" id="ex5Reset">Réinitialiser</button><button class="ok" id="ex5Check">Vérifier</button><span class="status" id="ex5Status">En attente…</span></div>
+        <div class="textbox">
+          <div class="legend">Astuce : SHIFT étend la sélection depuis le point de départ jusqu’au mot cliqué.</div>
+          <div class="words" id="shiftWords"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="small">Mini‑site d’entraînement – Clics & Sélections • Conçu pour débutants • Compatible clavier/souris • Hébergez‑le librement (GitHub Pages, Netlify, Neocities).</div>
+  </footer>
+
+  <script>
+    /* Utils */
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    /* -------- EX 1: Simple Clicks -------- */
+    const ex1 = (()=>{
+      const container = $('#targets');
+      const status = $('#ex1Status');
+      const resetBtn = $('#ex1Reset');
+      const total = 12;
+      let done = 0;
+
+      function render(){
+        container.innerHTML = '';
+        done = 0;
+        status.textContent = `${done} / ${total}`;
+        for(let i=1;i<=total;i++){
+          const d = document.createElement('div');
+          d.className = 'target';
+          d.innerHTML = `<span class="badge">${i}</span>`;
+          // Use click only; ignore dblclick/triple by debouncing
+          d.addEventListener('click', (e)=>{
+            if(d.classList.contains('done')) return;
+            // If this click is actually part of a dblclick, the browser will fire dblclick after. We still accept simple clicks.
+            d.classList.add('done');
+            done++; status.textContent = `${done} / ${total}`;
+          });
+          container.appendChild(d);
+        }
+      }
+      resetBtn.addEventListener('click', render);
+      render();
+    })();
+
+    /* -------- EX 2: Double Clicks -------- */
+    const ex2 = (()=>{
+      const container = $('#tiles');
+      const status = $('#ex2Status');
+      const resetBtn = $('#ex2Reset');
+      const total = 10; let ok = 0;
+      function render(){
+        container.innerHTML=''; ok=0; status.textContent=`${ok} / ${total}`;
+        for(let i=1;i<=total;i++){
+          const t = document.createElement('div');
+          t.className='tile'; t.innerHTML = '<div>Double‑cliquez</div>';
+          t.addEventListener('dblclick', ()=>{
+            if(t.classList.contains('ok')) return;
+            t.classList.add('ok'); ok++; status.textContent=`${ok} / ${total}`;
+          });
+          // Prevent single click confusing learners
+          t.addEventListener('click', (e)=>{
+            t.animate([{transform:'scale(1)'},{transform:'scale(.98)'},{transform:'scale(1)'}],{duration:120});
+          });
+          container.appendChild(t);
+        }
+      }
+      resetBtn.addEventListener('click', render);
+      render();
+    })();
+
+    /* -------- EX 3: Triple Click -------- */
+    const ex3 = (()=>{
+      const pad = $('#pad');
+      const status = $('#ex3Status');
+      const resetBtn = $('#ex3Reset');
+      let clicks = 0; let last = 0; const TH=1000; // 1s window
+
+      function reset(){ clicks=0; last=0; status.textContent='En attente…'; pad.classList.remove('tripled'); }
+
+      pad.addEventListener('click', (e)=>{
+        const now = performance.now();
+        if(now - last > TH){ clicks = 0; }
+        clicks++; last = now;
+        if(clicks===3){
+          pad.classList.add('tripled');
+          status.textContent = 'Bravo : triple‑clic réussi !';
+          pad.animate([{transform:'scale(1)'},{transform:'scale(1.03)'},{transform:'scale(1)'}],{duration:220});
+          clicks=0; // lock-in
+        }else{
+          status.textContent = `${clicks} / 3`;
+        }
+      });
+      resetBtn.addEventListener('click', reset);
+      reset();
+    })();
+
+    /* Words helpers for EX4/EX5 */
+    const makeWords = (text, container) => {
+      container.innerHTML='';
+      return text.split(/\s+/).map((w,i)=>{
+        const span = document.createElement('span');
+        span.textContent = w.replace(/_/g,' ');
+        span.className = 'word';
+        span.dataset.index = i;
+        container.appendChild(span);
+        return span;
+      });
+    };
+
+    /* -------- EX 4: CTRL selection (toggle) -------- */
+    const ex4 = (()=>{
+      const wordsBox = $('#ctrlWords');
+      const resetBtn = $('#ex4Reset');
+      const checkBtn = $('#ex4Check');
+      const status = $('#ex4Status');
+      const TARGET = new Set(['ordinateur','souris','clavier']);
+      const TEXT = 'Pour apprendre à utiliser la souris et le clavier de votre ordinateur, commencez par des gestes simples.';
+      let words = [];
+
+      function render(){
+        words = makeWords(TEXT, wordsBox);
+        status.textContent = 'En attente…';
+      }
+
+      wordsBox.addEventListener('click', (e)=>{
+        const w = e.target.closest('.word'); if(!w) return;
+        if(e.ctrlKey || e.metaKey){
+          w.classList.toggle('sel');
+        } else {
+          // Without CTRL: single selection (clear others)
+          $$('.word', wordsBox).forEach(x=>x.classList.remove('sel'));
+          w.classList.add('sel');
+        }
+      });
+
+      checkBtn.addEventListener('click', ()=>{
+        const selected = new Set($$('.word.sel', wordsBox).map(w=>w.textContent.toLowerCase().replace(/[.,;:!?]/g,'')));
+        const ok = [...TARGET].every(t=>selected.has(t)) && selected.size===TARGET.size;
+        status.textContent = ok ? '✅ Correct : bonne sélection avec CTRL' : '❌ Essayez encore (utilisez CTRL + clic pour choisir plusieurs mots)';
+        status.style.color = ok ? 'var(--ok)' : 'var(--err)';
+      });
+      resetBtn.addEventListener('click', render);
+      render();
+    })();
+
+    /* -------- EX 5: SHIFT range selection -------- */
+    const ex5 = (()=>{
+      const wordsBox = $('#shiftWords');
+      const resetBtn = $('#ex5Reset');
+      const checkBtn = $('#ex5Check');
+      const status = $('#ex5Status');
+      const TEXT = 'Nous allons apprendre ensemble à sélectionner rapidement une suite de mots sur votre ordinateur.';
+      let words=[]; let anchorIndex=null;
+      const startWord='apprendre';
+      const endWord='ordinateur';
+
+      function render(){
+        words = makeWords(TEXT, wordsBox);
+        status.textContent='En attente…';
+        anchorIndex = null;
+      }
+
+      function clearSel(){ $$('.word', wordsBox).forEach(w=>w.classList.remove('sel')); }
+      function rangeSel(i1,i2){
+        const [a,b] = i1<i2 ? [i1,i2] : [i2,i1];
+        for(let i=a;i<=b;i++){ words[i].classList.add('sel'); }
+      }
+
+      wordsBox.addEventListener('click', (e)=>{
+        const w = e.target.closest('.word'); if(!w) return;
+        const idx = +w.dataset.index;
+        if(e.shiftKey && anchorIndex!=null){ clearSel(); rangeSel(anchorIndex, idx); }
+        else { clearSel(); w.classList.add('sel'); anchorIndex = idx; }
+      });
+
+      checkBtn.addEventListener('click', ()=>{
+        const idxStart = words.findIndex(w=>w.textContent.toLowerCase().startsWith(startWord));
+        const idxEnd = words.findIndex(w=>w.textContent.toLowerCase().startsWith(endWord));
+        const selectedIdx = $$('.word.sel', wordsBox).map(w=>+w.dataset.index);
+        const expected = [];
+        const [a,b] = idxStart<idxEnd ? [idxStart,idxEnd] : [idxEnd,idxStart];
+        for(let i=a;i<=b;i++) expected.push(i);
+        const ok = selectedIdx.length===expected.length && selectedIdx.every((v,i)=>v===expected[i]);
+        status.textContent = ok ? '✅ Correct : bonne sélection avec SHIFT (intervalle)'
+                                : '❌ Recommencez : cliquez un mot de départ, puis SHIFT + clic sur le mot de fin.';
+        status.style.color = ok ? 'var(--ok)' : 'var(--err)';
+      });
+
+      resetBtn.addEventListener('click', render);
+      render();
+    })();
+  </script>
+</body>
+</html>
